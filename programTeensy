@@ -1,0 +1,44 @@
+#!/bin/bash
+
+#-mmcu=mk66fx1m0 :      Teensy 3.6
+#-mmcu=mk64fx512 :      Teensy 3.5
+#-mmcu=mk20dx256 :      Teensy 3.2 & 3.1
+#-mmcu=mk20dx128 :      Teensy 3.0
+#-mmcu=mkl26z64 :       Teensy LC
+#-mmcu=at90usb1286 :    Teensy++ 2.0
+#-mmcu=atmega32u4 :     Teensy 2.0
+#-mmcu=at90usb646 :     Teensy++ 1.0
+#-mmcu=at90usb162 :     Teensy 1.0
+
+#Variables, only change here
+#RESETPIN is 7th from the top, inside row
+#PROGRAMPIN is 8th from the top, inside row
+RESETPIN=2
+PROGRAMPIN=3
+TEENSY=-mmcu=mk66fx1m0
+
+SOURCEDIR=/home/pi/hex_output
+TEENSYLOADERDIR=/home/pi/teensy_loader_cli
+
+#STOP-no changes from here
+FILENAME=$1
+#Enable program pin
+gpio mode $PROGRAMPIN out
+gpio write $PROGRAMPIN 0
+# Start teensy_loader_cli with given file path
+$TEENSYLOADERDIR/teensy_loader_cli $TEENSY -w -v $SOURCEDIR/$FILENAME &
+sleep 1
+# Check exit state of teensy_loader_cli
+if [ "$?" = "0" ]; then
+        # If no error has occurred: Release program pin
+        gpio write $PROGRAMPIN 1
+        # HalfKay bootloader should be found and the hex file will be uploaded
+else
+        # If teensy_loader_cli has exit with any error code: Release program pin
+        gpio write $PROGRAMPIN 1
+        # But also reset Teensy
+        gpio mode $RESETPIN out
+        gpio write $RESETPIN 0
+        gpio write $RESETPIN 1
+        exit 1
+fi
