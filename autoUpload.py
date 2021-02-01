@@ -15,7 +15,8 @@ time.tzset()
 starttime = time.time()
 
 def getCode():
-        url = "https://raw.githubusercontent.com/haybur/qubehex/main/blink.hex"
+        url = "https://raw.githubusercontent.com/haybur/qubehex/main/qubecode.hex"
+        #url = "https://raw.githubusercontent.com/haybur/qubehex/main/blink.hex"
         r = requests.get(url, allow_redirects=True, timeout=2.0)
         open('/home/pi/blink.hex', 'wb').write(r.content)
 
